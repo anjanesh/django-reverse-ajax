@@ -1,0 +1,93 @@
+<html>
+<head>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>    
+</head>
+<body>    
+<script>
+var global_automate_foo;
+if (typeof global_automate_foo !== 'function')
+{
+    global_automate_foo = async (logs) =>
+    {
+        const formData = new FormData();    
+
+        let csrftoken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
+
+        const request = new Request("automate/",
+            { headers: {'X-CSRFToken': csrftoken} }
+        );
+
+        let response = await fetch(request, {
+            method: 'POST',
+            mode: 'same-origin',
+            body: formData,
+            headers: {'X-CSRFToken': csrftoken}
+        });
+
+        const reader = response.body.getReader();
+
+        let receivedLength = 0;
+        let chunks = [];
+
+        while(true)
+        {
+            let chunks_part = [];
+
+            const {done, value} = await reader.read();
+
+            if (done)
+            {
+                break;
+            }
+
+            chunks.push(value); chunks_part.push(value);
+            receivedLength += value.length;
+
+            let chunksAll = new Uint8Array(value.length);
+            let position = 0;
+            for (let chunk of chunks_part)
+            {
+                chunksAll.set(chunk, position);
+                position += chunk.length;
+            }
+
+            let result = new TextDecoder("utf-8").decode(chunksAll);
+            console.log("result = ", result);
+            json_result = JSON.parse(result);
+            console.log("json_result = ", json_result);
+            logs.push(json_result);
+        }
+
+        let chunksAll = new Uint8Array(receivedLength);
+        let position = 0;
+
+        for(let chunk of chunks)
+        {
+            chunksAll.set(chunk, position);
+            position += chunk.length;
+        }
+
+        let result = new TextDecoder("utf-8").decode(chunksAll);
+        console.log(result);
+    }
+}
+</script>
+<div x-data="{logs: []}">
+    
+    {% csrf_token %}
+    <button type="button" x-on:click="logs=[]; global_automate_foo(logs)">Click Me</button>
+    <div id="frm-post-details"></div>
+
+    <div>
+        <template x-for="(log, i) in logs" :key="Date.now() + Math.floor(Math.random() * 1000000)">
+            <div>
+                <div x-text="i + 1"></div>
+                <div x-text="'Status : ' + log.status + ' &middot; Percentage : ' + log.percentage"></div>                
+            </div>
+        </template>
+    </div>
+
+</div>
+
+</body>
+</html>
