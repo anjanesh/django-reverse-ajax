@@ -47,3 +47,10 @@ Click on the Click Me button
 You should see numbers from 1 to 10 displayed over a period of 5 seconds in half seconds interval. The 0.5 second pause is from the server side as `time.sleep(0.5)` and not on the set in the browser's JavaScript as `setInterval` . The waiting is done in the browser as `const {done, value} = await  reader.read();` where if `done` is *true* then it breaks the loop waiting for chunks.
 
 ## Demo
+
+https://yield.anjanesh.com
+
+## Preview
+
+https://github.com/anjanesh/django-reverse-ajax/assets/85973/df91a0f6-e581-4a6a-b103-e23f5ab5ddf7
+
